@@ -17,7 +17,22 @@ class Bills extends StatelessWidget {
         child: ListView(          
           children: dataRow.map((data) => item(BillsRowData: data,)).toList(),
         )),
+    floatingActionButton: const floatActionButton(),
     );
+  }
+}
+
+// ignore: camel_case_types
+class floatActionButton extends StatelessWidget {
+  const floatActionButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+       child: const Icon(Icons.add,),
+      onPressed: () {  },);
   }
 }
 
