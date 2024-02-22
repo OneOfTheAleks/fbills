@@ -1,8 +1,12 @@
 
+import 'package:fbills/data/db.dart';
 import 'package:fbills/widgets/bills.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+WidgetsFlutterBinding.ensureInitialized();
+
+    await DB.init();
   runApp(const MyApp());
 }
 
