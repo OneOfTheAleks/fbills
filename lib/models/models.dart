@@ -57,3 +57,31 @@ BillItem({ required this.id, required this.name, required this.operationType,req
   }
 
 }
+
+
+class UserList extends Model{
+ static String table = 'user_items'; 
+ String name;
+ 
+  var id;
+
+UserList({ required this.id, required this.name });
+  @override
+  Map<String, dynamic> toMap() {
+     Map<String, dynamic> map = {
+            'name': name,
+            'id': id 
+        };
+
+         return map;
+  }
+  static UserList fromMap(Map<String, dynamic> map) {
+         return UserList(
+            id: map['id'],
+            name: map['name']);
+  }
+
+
+
+
+}

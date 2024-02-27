@@ -1,21 +1,25 @@
 
 import 'package:fbills/data/db.dart';
 import 'package:fbills/widgets/bills.dart';
+import 'package:fbills/widgets/user_list.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 void main() async {
 WidgetsFlutterBinding.ensureInitialized();
 
-    await DB.init();
-  runApp(const MyApp());
+final   db = await DatabaseHelper.instance.database;
+ final myDb = MyDatabase(db: db);
+  runApp( MyApp(myDb: myDb,));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+   const MyApp({super.key, required this.myDb});
+final MyDatabase myDb;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Bills',
       theme: ThemeData(
@@ -23,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const TabBarMain()
+      home: TabBarMain(myDb: myDb,)
     );
   }
 }
@@ -31,7 +35,9 @@ class MyApp extends StatelessWidget {
 
 
 class TabBarMain extends StatelessWidget {
-  const TabBarMain({super.key});
+  const TabBarMain({super.key, required this.myDb});
+  
+ final MyDatabase myDb;
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +57,11 @@ class TabBarMain extends StatelessWidget {
             ),
             title: const Text('Bills'),
           ),
-          body: const TabBarView(
+          body:  TabBarView(
             children: [
-              Bills(),
-              Icon(Icons.directions_transit),
-              Icon(Icons.directions_bike),
+              const Bills(),
+              UsersRow(myDb: myDb),
+              const Icon(Icons.directions_bike),
             ],
           ),
         ),
