@@ -22,9 +22,11 @@ abstract class DB {
         }
     }
 
-    static void onCreate(Database db, int version) async =>
-        await db.execute('CREATE TABLE bill_items (id INTEGER PRIMARY KEY NOT NULL, task STRING, complete BOOLEAN)');
-
+    static void onCreate(Database db, int version) async =>() async {
+        await db.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY NOT NULL, name STRING)');
+        await db.execute('CREATE TABLE IF NOT EXISTS bill_items (id INTEGER PRIMARY KEY NOT NULL, name STRING, operationType INTEGER, remains REAL,user_id INTEGER, FOREIGN KEY(user_id) REFERENCES users(id) )');
+        
+};
     static Future<Future<List<Map<String, Object?>>>?> query(String table) async => _db?.query(table);
 
     static Future<int?> insert(String table, Model model) async =>
