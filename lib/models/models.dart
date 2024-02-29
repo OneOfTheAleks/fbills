@@ -84,4 +84,12 @@ UserList({ required this.id, required this.name });
 
 
 
+
+}
+
+
+class User {
+ static String name = '';
+ static String note ='';
+ static int id = 0;
 }

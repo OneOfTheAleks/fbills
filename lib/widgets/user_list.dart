@@ -2,128 +2,125 @@
 
 
 import 'package:fbills/data/db.dart';
-import 'package:fbills/widgets/add_bill.dart';
+import 'package:fbills/widgets/users.dart';
 import 'package:flutter/material.dart';
 
 
-class UsersRow extends StatefulWidget {
+class UsersList extends StatefulWidget {
+   UsersList({super.key, required this.myDb});
+
+  final MyDatabase myDb;
+
+  @override
+  // ignore: no_logic_in_create_state
+  State<UsersList> createState() => _UsersListState(myDb: myDb);
+}
+
+class _UsersListState extends State<UsersList> {
+   _UsersListState({required this.myDb});
+  List<Map<String, dynamic>>? _rows;
    final MyDatabase myDb;
-   const UsersRow({ Key? key, required this.myDb }) : super(key: key);
 
   @override
-  State<UsersRow> createState() => _UsersState();
-}
-
-class _UsersState extends State<UsersRow> {
-   List<Map<String, dynamic>> _data = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Пользователи'),
-        backgroundColor: Colors.green,
-      ),
-      body: Container(
-        color: Colors.green,
-        child: SizedBox(
-          width: double.infinity,
-          child: ListView(  
-            children:_data.map((data) => Item(UserRowData:data)).toList() //dataRow.map((data) => Item(BillsRowData: data,)).toList(),
-          )
-          ),
-      ),
-    floatingActionButton: const floatActionButton(),
-    );
+  void initState() {
+    super.initState();
+    _refreshRow();
   }
-}
 
-// ignore: must_be_immutable
-class Item extends StatefulWidget {
-
-   // ignore: non_constant_identifier_names, prefer_typing_uninitialized_variables
-var UserRowData;
-
-  // ignore: non_constant_identifier_names
-  Item({super.key, required UserRowData});
-
-  @override
-  State<Item> createState() => _itemState();
-}
-
-// ignore: camel_case_types
-class _itemState extends State<Item> {
-  @override
-  Widget build(BuildContext context) {
-    return  Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 5),
-      child: Row(
-        
-        children: [
-          const Icon(Icons.arrow_circle_right_outlined),
-          const SizedBox(width: 20,),
-          Expanded(child:Text(widget.UserRowData.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,),
-          )
-          ),
-          const SizedBox(width: 200,),
-      
-        ],
-      ),
-    );
+  void _refreshRow() {
+    _rows = null;
+    widget.myDb.getAllUserRows().then((rows) {
+      setState(() {
+        _rows = rows;
+      });
+    });
   }
-}
 
-
-
-
-class floatActionButton extends StatelessWidget {
-  const floatActionButton({
-    super.key,
+void _showAddUserDialog() {
+  showDialog(
+    context: context,
+    barrierColor: Colors.transparent, // Add this line
+    builder: (context) => AddUserDialog(myDb: myDb,),
+  ).then((_) {
+    setState(() {
+      _refreshRow();
+    });
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-       child: const Icon(Icons.add,),
-      onPressed: () {
-         Navigator.push(context, MaterialPageRoute(builder: (context) => const AddBill()));
-        },
-        );
-  }
 }
 
 
-class URow extends StatelessWidget {
-  const URow({super.key, required this.myDb});
-
-final MyDatabase myDb;
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: myDb.getAllRows(),
-      builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>> snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something went wrong');
-        }
+    if (_rows == null) {
+      return const CircularProgressIndicator();
+    }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          
-          return const Text('Loading...');
-        }
+    return Scaffold(
+      body: ListView.builder(
+        itemCount: _rows?.length ?? 0,
+        itemBuilder: (BuildContext context, int index) {
+          return  GestureDetector(
+            onLongPress: () {
+              int userId = _rows![index]['id'];
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Удалить  пользователя'),
+                  content: const Text('Вы уверены?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Отмена'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                      await  widget.myDb.deleteUserRow(userId);
+                      setState(() {
+                                   _refreshRow();
+                                  }
+                                );
 
-        return ListView.builder(
-          itemCount: snapshot.data!.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(snapshot.data![index]['name']),
-            );
-          },
-        );
-      },
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Удалить'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            child: InkWell(
+              onTap: () {
+                int userId = _rows![index]['id'];
+                showDialog(
+                  context: context,
+                  builder: (context) => EditUserDialog(
+                    userId: userId,
+                    myDb: myDb,
+                    onUserUpdated: _refreshRow,
+                  ),
+                );
+              },
+              child: ListTile(
+                title: Text(_rows![index]['name'] ?? ''),
+              ),
+            ),
+          );
+        },
+      ),
+       floatingActionButton: FloatingActionButton(
+        onPressed: _showAddUserDialog,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
+
+
+
+
+
+
+
+

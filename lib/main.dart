@@ -3,7 +3,6 @@ import 'package:fbills/data/db.dart';
 import 'package:fbills/widgets/bills.dart';
 import 'package:fbills/widgets/user_list.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 
 void main() async {
 WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +59,7 @@ class TabBarMain extends StatelessWidget {
           body:  TabBarView(
             children: [
               const Bills(),
-              UsersRow(myDb: myDb),
+              UsersList(myDb: myDb),
               const Icon(Icons.directions_bike),
             ],
           ),
